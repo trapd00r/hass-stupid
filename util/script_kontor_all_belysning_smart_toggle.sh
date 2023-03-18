@@ -1,2 +1,2 @@
 #!/bin/sh
-hass-cli service call script.kontor_all_belysning_100
+hass-cli service call script.kontor_all_belysning_100 > /dev/null
