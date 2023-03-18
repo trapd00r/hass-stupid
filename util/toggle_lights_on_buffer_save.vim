@@ -2,7 +2,7 @@
 "
 " - adjust the shell script to your light service(s)
 " - place the script in your $PATH
-" - source his or add to your .vimrc
+" - source this or add to your .vimrc
 " - start saving!!
 
 command! -nargs=1 Vafan execute ':silent !'.<q-args> | execute ':redraw!'
