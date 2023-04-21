@@ -1,0 +1,137 @@
+blueprint:
+  name: Awtrix Toggle Indicators
+  description: Toggle the Indicators on the Ulanzi Clock
+  domain: automation
+  author: Smart Home Junkie
+  input:
+    awtrix_display:
+      name: Awtrix Display
+      description: Select the target Awtrix display.
+      selector:
+        device:
+          model: "AWTRIX Light"
+    toggle_helper_indicator_1:
+      name: Right Top Indicator Toggle Helper
+      description: Select the Toggle Helper that will toggle the right top indicator.
+      selector:
+        entity:
+          domain: input_boolean
+    indicator_1_color:
+      name: Right Top Indicator color
+      description: Select the Right Top Indicator color
+      selector:
+        color_rgb:
+      default: [255, 255, 255]
+    indicator_1_blink:
+      name: Blink Right Top Indicator
+      description: Should the Right Top Indicator blink?
+      selector:
+        boolean:
+      default: false
+    toggle_helper_indicator_2:
+      name: Right Bottom Indicator Toggle Helper
+      description: Select the Toggle Helper that will toggle the right bottom indicator.
+      selector:
+        entity:
+          domain: input_boolean
+    indicator_2_color:
+      name: Right Bottom Indicator color
+      description: Select the Right Bottom Indicator color
+      selector:
+        color_rgb:
+      default: [255, 255, 255]
+    indicator_2_blink:
+      name: Blink Right Bottom Indicator
+      description: Should The Right Bottom indicator blink?
+      selector:
+        boolean:
+      default: false
+
+trigger:
+  - platform: state
+    entity_id: !input toggle_helper_indicator_1
+    to: "on"
+    id: indicator 1 on
+  - platform: state
+    entity_id: !input toggle_helper_indicator_1
+    to: "off"
+    id: indicator 1 off
+  - platform: state
+    entity_id: !input toggle_helper_indicator_2
+    to: "on"
+    id: indicator 2 on
+  - platform: state
+    entity_id: !input toggle_helper_indicator_2
+    to: "off"
+    id: indicator 2 off
+
+variables:
+  device_id: !input awtrix_display
+  my_display: >
+    {{ iif( device_attr(device_id, 'name_by_user') != none, device_attr(device_id, 'name_by_user'), device_attr(device_id, 'name') ) }}
+  my_toggle_helper_1: toggle_helper_indicator_1
+  my_toggle_helper_2: toggle_helper_indicator_2
+  my_toggle_helper: toggle_helper
+  indicator_1_color: !input indicator_1_color
+  indicator_2_color: !input indicator_2_color
+  indicator_1_blink: !input indicator_1_blink
+  indicator_2_blink: !input indicator_2_blink
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: indicator 1 on
+        sequence:
+          - service: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: "{{my_display}}/indicator1"
+              payload: |-
+                {   
+                  "color": {{ indicator_1_color }},
+                  "blink": {{ iif(indicator_1_blink, "true", "false") }}
+                }
+      - conditions:
+          - condition: trigger
+            id: indicator 1 off
+        sequence:
+          - service: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: "{{my_display}}/indicator1"
+              payload: |-
+                {   
+                  "color": "0",
+                  "blink": {{ iif(indicator_1_blink, "true", "false") }}
+                }
+      - conditions:
+          - condition: trigger
+            id: indicator 2 on
+        sequence:
+          - service: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: "{{my_display}}/indicator2"
+              payload: |-
+                {   
+                  "color": {{ indicator_2_color }},
+                  "blink": {{ iif(indicator_2_blink, "true", "false") }}
+                }
+      - conditions:
+          - condition: trigger
+            id: indicator 2 off
+        sequence:
+          - service: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: "{{my_display}}/indicator2"
+              payload: |-
+                {   
+                  "color": "0",
+                  "blink": {{ iif(indicator_2_blink, "true", "false") }}
+                }
