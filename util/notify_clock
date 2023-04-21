@@ -1,0 +1,19 @@
+#!/bin/sh
+# send args to awtrix clock
+
+ HOST=192.168.1.13
+TOPIC="awtrix_d/notify"
+
+mosquitto_pub \
+  -h $HOST          \
+  -m "{text: '$@', color:'#ff0000'}" \
+  -t $TOPIC         \
+  -u $MQTT_USER     \
+  -P $MQTT_PASS     \
+  -r
+
+
+
+# text: "Hello World",
+# duration: 200,
+# color: "00FF00",
