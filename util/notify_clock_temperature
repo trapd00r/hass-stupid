@@ -1,0 +1,25 @@
+#!/bin/sh
+# send args to awtrix clock
+HOST=192.168.1.13
+TOPIC="awtrix_d/notify"
+OLD_TEMP=0
+
+while true; do
+  OFFICE_TEMP=$(hass-cli state get sensor.kontor_temperatur_temperature | tail -1 | awk '{print $5}')
+
+  OFFICE_TEMP_FLOAT=$(echo "$OFFICE_TEMP" | bc)
+
+  if [ $(echo "$OFFICE_TEMP_FLOAT > $OLD_TEMP" | bc) -eq 1 ]; then
+    printf "New temp: $OFFICE_TEMP is higher than old temp: $OLD_TEMP\n"
+    OLD_TEMP=$OFFICE_TEMP_FLOAT
+  fi
+  
+  mosquitto_pub \
+    -h $HOST          \
+    -m "{\"text\": \"$OFFICE_TEMP\", \"color\":\"#7f9d43\", \"hold\": true, \"icon\": \"2056\", \"center\": true}" \
+    -t $TOPIC         \
+    -u $MQTT_USER     \
+    -P $MQTT_PASS     \
+    -r
+  sleep 60
+done
